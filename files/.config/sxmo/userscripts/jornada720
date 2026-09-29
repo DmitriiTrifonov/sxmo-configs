@@ -1,0 +1,3 @@
+#!/bin/sh
+# title="Jornada 720 (WinCE)"
+exec "$HOME/Developer/qemu-jornada720/run.sh" -- -full-screen

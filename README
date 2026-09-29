@@ -1,1 +1,12 @@
 my config
+
+# sxmo backup
+Restore: `./restore.sh` (copies files/ into $HOME, existing files -> *.orig).
+
+Not included (do manually on the new device):
+- ~/.ssh keys (secrets)
+- /etc/doas.conf (root-only)
+- ~/Developer/{WindEmu,qemu-jornada720} and ~/PumpkinOS, ~/roms — userscripts in
+  ~/.config/sxmo/userscripts reference them via $HOME/...
+- Packages: foot, wob, wofi, neovim, htop, git, qemu (install via apk)
+- ~/.config/nvim is a git clone of: https://github.com/DmitriiTrifonov/nvim-config.git (backup holds a plain copy; `git clone` it instead if you prefer)

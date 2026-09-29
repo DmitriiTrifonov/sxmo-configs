@@ -1,0 +1,4 @@
+#!/bin/sh
+# title="Jornada 720 (WinCE, pixel-exact scaling with borders)"
+export QEMU_SDL_SCALE=integer
+exec "$HOME/Developer/qemu-jornada720/run.sh" -- -full-screen

@@ -1,0 +1,4 @@
+#!/bin/sh
+# title="Jornada 720: touch debug (log to ~/touch.log)"
+export J720_TOUCH_DEBUG=1
+exec "$HOME/Developer/qemu-jornada720/run.sh" -- -full-screen 2>"$HOME/touch.log"
