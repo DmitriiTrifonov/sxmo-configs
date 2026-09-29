@@ -1,0 +1,14 @@
+alpine-baselayout
+apk-tools
+busybox
+device-google-bonito
+device-google-bonito-kernel-sdc
+musl-utils
+postmarketos-artwork-wallpapers
+postmarketos-base
+postmarketos-base-nofde
+postmarketos-base-systemd
+postmarketos-base-ui-audio-backend-pulseaudio
+postmarketos-base-ui-wifi-wpa_supplicant
+postmarketos-mkinitfs
+postmarketos-ui-sxmo-de-sway

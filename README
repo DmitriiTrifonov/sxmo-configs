@@ -8,5 +8,11 @@ Not included (do manually on the new device):
 - /etc/doas.conf (root-only)
 - ~/Developer/{WindEmu,qemu-jornada720} and ~/PumpkinOS, ~/roms — userscripts in
   ~/.config/sxmo/userscripts reference them via $HOME/...
-- Packages: foot, wob, wofi, neovim, htop, git, qemu (install via apk)
 - ~/.config/nvim is a git clone of: https://github.com/DmitriiTrifonov/nvim-config.git (backup holds a plain copy; `git clone` it instead if you prefer)
+
+## Layout
+- `files/` — dotfiles mirrored relative to $HOME
+- `userscripts/` — sxmo userscripts (restored to ~/.config/sxmo/userscripts)
+- `packages.txt` — user-installed apk packages; `./install-packages.sh` installs them
+- `packages-base.txt` — postmarketOS base / device-specific packages (reference only,
+  Pixel 3a "bonito"; comes with the base install)
