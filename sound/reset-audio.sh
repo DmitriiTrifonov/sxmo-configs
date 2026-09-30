@@ -17,6 +17,14 @@ mkdir -p ~/.config/pulse
 CONF=~/.config/pulse/client.conf
 had_conf=0; [ -e "$CONF" ] && had_conf=1
 [ $had_conf -eq 1 ] || printf '# ВРЕМЕННО: создано reset-audio.sh\nautospawn = no\n' > "$CONF"
+# При любом выходе (ошибка, Ctrl+C) вернуть автозапуск и поднять PulseAudio,
+# иначе временный конфиг останется и звук не заработает до ручной чистки.
+cleanup() {
+	[ $had_conf -eq 1 ] || rm -f "$CONF"
+	pgrep pulseaudio >/dev/null || pulseaudio --start --log-target=syslog
+}
+trap cleanup EXIT
+trap 'exit 1' INT TERM HUP
 pulseaudio -k 2>/dev/null
 sleep 2
 pgrep pulseaudio >/dev/null && { echo "PulseAudio не остановился"; exit 1; }
