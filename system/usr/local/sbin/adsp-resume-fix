@@ -1,0 +1,62 @@
+#!/bin/sh
+# Сброс звука после выхода из сна (Pixel 3a XL, sdm670).
+# После resume ADSP падает, и обычный перезапуск не помогает: звуковую карту, кодеки
+# и усилители cs35l36 нужно отвязать на время перезапуска ADSP (см. reset-audio.sh).
+# Установка: doas install -m755 adsp-resume-fix /usr/lib/systemd/system-sleep/adsp-resume-fix
+# Ручной запуск: doas /usr/lib/systemd/system-sleep/adsp-resume-fix post
+
+RPROC=/sys/class/remoteproc/remoteproc1
+USER_NAME=user
+USER_UID=10000
+USER_HOME=/home/user
+AMPS="2-0040 2-0041"
+SVCS="hexagonrpcd-adsp-rootpd hexagonrpcd-adsp-sensorspd"
+P=/sys/bus/platform
+CONF=$USER_HOME/.config/pulse/client.conf
+
+[ "$1" = post ] || exit 0
+[ "$(cat $RPROC/name 2>/dev/null)" = adsp ] || exit 0
+
+unb() { echo "$2" > "$1/unbind" 2>/dev/null; }
+bnd() { echo "$2" > "$1/bind" 2>/dev/null; }
+
+logger -t adsp-resume-fix "сброс звука после сна"
+
+# 1. PulseAudio выключить и не давать клиентам поднять его, пока идёт сброс
+made_conf=0
+if [ ! -e "$CONF" ]; then
+	mkdir -p "$USER_HOME/.config/pulse"
+	printf 'autospawn = no\n' > "$CONF" && chown "$USER_NAME" "$CONF" && made_conf=1
+fi
+pkill -u "$USER_UID" pulseaudio
+sleep 2
+for s in $SVCS; do systemctl stop "$s"; done
+
+# 2. Отвязать карту, кодеки и усилители, перезапустить ADSP
+unb $P/drivers/snd-sm8250 sound
+for a in $AMPS; do unb /sys/bus/i2c/drivers/cs35l36 "$a"; done
+unb $P/drivers/qcom,pm8916-wcd-spmi-codec c440000.spmi:pmic@3:audio-codec@f000
+unb $P/drivers/msm8916-wcd-digital-codec 62ec0000.audio-codec
+echo stop > $RPROC/state 2>/dev/null
+sleep 3
+echo start > $RPROC/state
+i=0
+while [ "$(cat $RPROC/state)" != running ] && [ $i -lt 20 ]; do sleep 1; i=$((i + 1)); done
+sleep 5
+
+# 3. Привязать обратно
+bnd $P/drivers/msm8916-wcd-digital-codec 62ec0000.audio-codec
+bnd $P/drivers/qcom,pm8916-wcd-spmi-codec c440000.spmi:pmic@3:audio-codec@f000
+for a in $AMPS; do bnd /sys/bus/i2c/drivers/cs35l36 "$a"; done
+sleep 2
+bnd $P/drivers/snd-sm8250 sound
+sleep 3
+for s in $SVCS; do systemctl start "$s"; done
+
+# 4. Вернуть PulseAudio
+[ $made_conf -eq 1 ] && rm -f "$CONF"
+su -l "$USER_NAME" -c "XDG_RUNTIME_DIR=/run/user/$USER_UID pulseaudio --start --log-target=syslog" 2>/dev/null
+
+state=$(cat $RPROC/state)
+logger -t adsp-resume-fix "готово, ADSP: $state"
+[ "$state" = running ]

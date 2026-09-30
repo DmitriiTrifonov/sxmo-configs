@@ -16,3 +16,14 @@ Not included (do manually on the new device):
 - `packages.txt` — user-installed apk packages; `./install-packages.sh` installs them
 - `packages-base.txt` — postmarketOS base / device-specific packages (reference only,
   Pixel 3a "bonito"; comes with the base install)
+- `system/` — root-файлы (powerplan-apply, планы питания, adsp-resume-fix), зеркало `/`;
+  ставятся `./install-system.sh`
+- `sound/` — фикс звука Pixel 3a XL (ADSP падает после сна): `install-wake-hook.sh` ставит
+  adsp-resume-fix + правило doas + хук sxmo_hook_postwake; `reset-audio.sh` — ручной сброс,
+  `check-sound.sh` — проверка
+
+## Режимы питания (powerplan)
+`powerplan list|get|set <план>` (~/.local/bin), планы: performance, balanced, eco, night
+(`system/usr/local/share/powerplan/plans/*.conf`). Пункты меню sxmo — userscripts `plan-*`.
+Внимание: `powerplan` вызывает `sudo`, а не doas — на новом устройстве нужен sudo
+или замена на doas.
