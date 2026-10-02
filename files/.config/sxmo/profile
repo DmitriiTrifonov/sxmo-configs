@@ -75,3 +75,6 @@ export LC_ALL=ru_RU.UTF-8
 
 export KEYBOARD_ARGS="-l simple,cyrillic,special,emoji"
 export SXMO_BG_IMG=/home/user/wallpaper-hotkeys-landscape.png
+
+# Показывать проценты заряда батареи в статус баре
+export SXMO_BAR_SHOW_BAT_PER=1

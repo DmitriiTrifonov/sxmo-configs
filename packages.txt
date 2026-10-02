@@ -1,9 +1,11 @@
 adwaita-icon-theme
 alsa-lib
+alsa-lib-dev
 bash
 bison
 bluez
 build-base
+cargo
 clickclack
 composer
 fastfetch
@@ -26,10 +28,12 @@ meson
 mobile-config-firefox
 musl-locales
 musl-locales-lang
+ncurses-dev
 neovim
 ninja
 openssh-client
 openssh-server
+openssl-dev
 perl
 php84
 php85-ctype
@@ -43,6 +47,7 @@ poppler-utils
 python3
 qt5-qtbase-dev
 qt5-qttools-dev
+rust
 sdl2
 sdl2-dev
 sfeed

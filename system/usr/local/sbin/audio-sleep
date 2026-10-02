@@ -1,0 +1,28 @@
+#!/bin/sh
+# Останавливает hexagonrpcd-adsp-rootpd перед сном и запускает после пробуждения (Pixel 3a XL, sdm670).
+# Если rootpd работает во время сна, ADSP падает при пробуждении (IST46, PC=f003ed1c):
+# по журналу 31 краш из 31 сна с rootpd и 0 крашей сразу после пробуждения без него.
+# Это тот же баг FastRPC, из-за которого sxmo_suspend.sh останавливает hexagonrpcd-adsp-sensorspd.
+# (Отвязка звуковой карты перед сном не помогла — проверено 2026-10-02.)
+# Вызывается из ~/.config/sxmo/hooks/sxmo_suspend.sh через doas.
+# Использование: audio-sleep pre|post
+
+SVC=hexagonrpcd-adsp-rootpd
+STAMP=/run/audio-sleep.stopped
+
+case $1 in
+pre)
+	systemctl is-active --quiet $SVC || exit 0  # уже остановлен — после сна не запускаем
+	touch $STAMP
+	systemctl stop $SVC
+	logger -t audio-sleep "rootpd остановлен перед сном"
+	;;
+post)
+	[ -e $STAMP ] || exit 0  # останавливали не мы — не трогаем
+	rm -f $STAMP
+	systemctl start $SVC
+	logger -t audio-sleep "rootpd запущен после сна, ADSP: $(cat /sys/class/remoteproc/remoteproc1/state)"
+	;;
+*)
+	echo "использование: $0 pre|post" >&2; exit 2 ;;
+esac

@@ -20,7 +20,10 @@ Not included (do manually on the new device):
   ставятся `./install-system.sh`
 - `sound/` — фикс звука Pixel 3a XL (ADSP падает после сна): `install-wake-hook.sh` ставит
   adsp-resume-fix + правило doas + хук sxmo_hook_postwake; `reset-audio.sh` — ручной сброс,
-  `check-sound.sh` — проверка
+  `check-sound.sh` — проверка; `install-audio-sleep.sh` ставит audio-sleep + правила doas +
+  хук sxmo_suspend.sh (останавливает hexagonrpcd-adsp-rootpd на время сна, откат `--remove`);
+  `sleep-stats.sh` — статистика падений ADSP после сна. Userscript `sound-reset` — сброс из меню.
+  Без правил doas хуки sxmo_suspend/postwake не смогут вызвать audio-sleep/adsp-resume-fix.
 
 ## Режимы питания (powerplan)
 `powerplan list|get|set <план>` (~/.local/bin), планы: performance, balanced, eco, night

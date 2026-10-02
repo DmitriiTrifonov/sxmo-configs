@@ -1,0 +1,26 @@
+#!/bin/sh
+# title="Звук: сбросить (ADSP)"
+# Полный сброс звука: перезапуск ADSP с отвязкой карты и усилителей,
+# затем динамик по умолчанию, mute выкл, громкость 70%.
+# Пароль не нужен: правило doas для adsp-resume-fix (см. ~/Developer/3a-xl-sound).
+. sxmo_common.sh 2>/dev/null
+
+SINK=alsa_output.platform-sound.VoiceCall__Speakers__sink
+
+sxmo_notify_user.sh "Звук: сброс... (~20 с)"
+sxmo_wakelock.sh lock sound_reset 60s 2>/dev/null
+if ! doas -n /usr/local/sbin/adsp-resume-fix post >/dev/null 2>&1; then
+	sxmo_notify_user.sh "Звук: сброс не удался (ADSP: $(cat /sys/class/remoteproc/remoteproc1/state))"
+	exit 1
+fi
+
+i=0
+while ! pactl list short sinks 2>/dev/null | grep -q "$SINK" && [ $i -lt 10 ]; do sleep 1; i=$((i + 1)); done
+if pactl set-default-sink "$SINK" 2>/dev/null; then
+	pactl set-sink-mute "$SINK" 0
+	pactl set-sink-volume "$SINK" 70%
+	sxmo_notify_user.sh "Звук: готово, динамик 70%"
+else
+	sxmo_notify_user.sh "Звук: ADSP поднят, но динамика в PulseAudio нет"
+fi
+sxmo_wakelock.sh unlock sound_reset 2>/dev/null
